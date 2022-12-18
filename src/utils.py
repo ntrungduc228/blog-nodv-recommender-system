@@ -27,7 +27,7 @@ def preprocessing_tags(soup, tags=None):
 
 
 
-def editorJsDataToText(data, tags=['pre', 'code', 'a', 'img', 'i']):
+def editorJs_data_to_text(data, tags=['pre', 'code', 'a', 'img', 'i']):
     """ Converts a editorjs data to plaintext
     """
     parser = EditorJsParser(data)
