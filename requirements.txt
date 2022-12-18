@@ -1,0 +1,7 @@
+numpy~=1.23.5
+pymongo~=4.3.3
+Flask~=2.2.2
+pyeditorjs~=1.0.0b0
+bs4~=0.0.1
+beautifulsoup4~=4.11.1
+pyvi~=0.1.1
