@@ -87,13 +87,61 @@ class Post(Resource):
             "related_posts": related_posts,
         })
 
+class PostsRecommend(Resource):
+  def get(self, post_id):
+    main_post = mongo_col.find_one({"_id": ObjectId(post_id)}, {"content": 1})
+    # preprocessing
+    content = editorJs_data_to_text(json.loads(main_post["content"]))
+    text_corpus = make_texts_corpus([content])
+    bow = id2word.doc2bow(next(text_corpus))
+    doc_distribution = np.array(
+        [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
+    )
+    # recommender posts
+    most_sim_ids = list(get_most_similar_documents(
+        doc_distribution, doc_topic_dist))[1:]
 
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}
+    most_sim_ids = [int(id_) for id_ in most_sim_ids]
+    posts = mongo_col.aggregate([
+      {"$lookup": {
+        "from": "users",
+        "localField": "user.$id",
+        "foreignField": "_id",
+        "pipeline": [
+          {"$project": {"_id": 0, "id": {
+            "$toString": "$_id"
+          }, "username": 1, "email": 1, "avatar": 1}}
+        ],
+        "as": "user"
+        }},
+      {"$match": {"idrs": {"$in": most_sim_ids}}},
+      {"$project": {"_id": 0,"id": {
+        "$toString": "$_id"
+      }, "title": 1, "subtitle": 1,"thumbnail" : 1, "user": {"$arrayElemAt": ["$user", 0]}, "createdDate":{
+        "$dateToString": {
+          "date": "$createdDate"
+        }
+      }}},
+      {"$sort": {"createdDate": -1}},
+      {"$limit": 10}
+    ])
+
+    related_posts = [
+        {
+            "id": post["id"],
+            "title": post["title"],
+            "user": post["user"],
+            "thumbnail": post["thumbnail"] if "thumbnail" in post else None,
+            "createdDate": post["createdDate"],
+        }
+        for post in posts
+    ][1:]
+    return jsonify(related_posts)
 
 
-api.add_resource(HelloWorld, '/')
+
+
+api.add_resource(PostsRecommend, '/api/posts/<post_id>/recommend')
 api.add_resource(Post, '/posts/<post_id>')
 
 # @app.route("/")
