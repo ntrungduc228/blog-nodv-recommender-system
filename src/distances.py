@@ -17,7 +17,7 @@ def jensen_shannon(query, matrix):
     return np.sqrt(0.5 * (entropy(p, m) + entropy(q, m)))
 
 
-def get_most_similar_documents(query, matrix, k=10):
+def get_most_similar_documents(query, matrix, k=7):
     """
     This function implements the Jensen-Shannon distance above
     and returns the top k indices of the smallest jensen shannon distances
@@ -25,4 +25,15 @@ def get_most_similar_documents(query, matrix, k=10):
     # list of jensen shannon distances
     sims = jensen_shannon(query, matrix)
     # the top k positional index of the smallest Jensen Shannon distances
-    return sims.argsort()[:k]
+
+    # return sims.argsort()[:k]
+    print('sims ', sims[sims.argsort()])
+    print('=======================\n')
+
+    print('list ', list(sims[sims.argsort()])[:k])
+    print('list index ', list(sims.argsort())[:k], '\n')
+
+    print('list reverse', list(sims[sims.argsort()])[::-1][:k])
+    print('list reverse index', list(sims.argsort())[::-1][:k])
+    arr = sims.argsort()
+    return arr[:k]
