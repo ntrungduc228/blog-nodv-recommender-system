@@ -63,12 +63,14 @@ class Post(Resource):
         doc_distribution = np.array(
             [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
         )
+        # print('doc ', doc_distribution)
 
         # recommender posts
         most_sim_ids = list(get_most_similar_documents(
             doc_distribution, doc_topic_dist))[1:]
 
         most_sim_ids = [int(id_) for id_ in most_sim_ids]
+        print('most ', most_sim_ids)
         posts = mongo_col.find({"idrs": {"$in": most_sim_ids}})
         related_posts = [
                             {
