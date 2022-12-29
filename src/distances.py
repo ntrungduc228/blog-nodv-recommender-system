@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import entropy
 from gensim import similarities
-import settings
+from src import settings
 
 def jensen_shannon(query, matrix):
     """

@@ -128,15 +128,13 @@ class PostsRecommend(Resource):
             {"$match": {"idrs": {"$in": most_sim_ids}}},
             {"$project": {"_id": 0, "id": {
                 "$toString": "$_id"
-            }, "title": 1, "subtitle": 1, "thumbnail": 1, "user": {"$arrayElemAt": ["$user", 0]}, "createdDate": {
+            }, "title": 1, "subtitle": 1, "thumbnail": 1, "idrs": 1, "user": {"$arrayElemAt": ["$user", 0]}, "createdDate": {
                 "$dateToString": {
                     "date": "$createdDate"
                 }
             }}},
             {"$sort": {"createdDate": -1}},
-            {"$limit": 10}
         ])
-
         related_posts = [
                             {
                                 "id": post["id"],
@@ -144,9 +142,11 @@ class PostsRecommend(Resource):
                                 "user": post["user"],
                                 "thumbnail": post["thumbnail"] if "thumbnail" in post else None,
                                 "createdDate": post["createdDate"],
+                                "idrs": post["idrs"]
                             }
                             for post in posts
-                        ][1:]
+                        ]
+        related_posts.sort(key=lambda x: most_sim_ids.index(x["idrs"]))
         return jsonify(related_posts)
 
 
