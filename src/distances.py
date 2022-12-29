@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import entropy
-
+from gensim import similarities
+import settings
 
 def jensen_shannon(query, matrix):
     """
@@ -37,3 +38,11 @@ def get_most_similar_documents(query, matrix, k=7):
     print('list reverse index', list(sims.argsort())[::-1][:k])
     arr = sims.argsort()
     return arr[:k]
+
+
+index = similarities.MatrixSimilarity.load(settings.PATH_MATRIX_SIMILARITY)
+def get_posts_similarity(vector_doc, k=10):
+    sims = index[vector_doc]
+    sims = sorted(enumerate(sims), key=lambda item: -item[1])
+    arr = [tup[0] for tup in sims[:k]]
+    return arr

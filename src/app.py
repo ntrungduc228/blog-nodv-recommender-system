@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 import json
 
 import settings
-from src.distances import get_most_similar_documents
+from src.distances import get_most_similar_documents, get_posts_similarity
 from src.models import make_texts_corpus
 from utils import editorJs_data_to_text
 
@@ -56,7 +56,8 @@ class Post(Resource):
             "text": editorJs_data_to_text(json.loads(main_post["content"])),
             "title": main_post["title"],
             "subtitle": main_post["subtitle"],
-            "content": main_post["content"]
+            "content": main_post["content"],
+            "idrs": main_post["idrs"] if 'idrs' in main_post else -1
         }
 
         # preprocessing
@@ -66,12 +67,14 @@ class Post(Resource):
         doc_distribution = np.array(
             [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
         )
+        vector_doc = lda_model[bow]
         # print('doc ', doc_distribution)
 
         # recommender posts
-        most_sim_ids = list(get_most_similar_documents(
-            doc_distribution, doc_topic_dist))[1:]
-
+        # most_sim_ids = list(get_most_similar_documents(doc_distribution, doc_topic_dist))[1:]
+        most_sim_ids = list(get_posts_similarity(vector_doc))
+        if main_post['idrs'] in most_sim_ids:
+            most_sim_ids.remove(main_post['idrs'])
         most_sim_ids = [int(id_) for id_ in most_sim_ids]
         print('most ', most_sim_ids)
         posts = mongo_col.find({"idrs": {"$in": most_sim_ids}})
@@ -95,7 +98,7 @@ class Post(Resource):
 
 class PostsRecommend(Resource):
     def get(self, post_id):
-        main_post = mongo_col.find_one({"_id": ObjectId(post_id)}, {"content": 1})
+        main_post = mongo_col.find_one({"_id": ObjectId(post_id)}, {"content": 1, "idrs": 1})
         # preprocessing
         content = editorJs_data_to_text(json.loads(main_post["content"]))
         text_corpus = make_texts_corpus([content])
@@ -103,10 +106,12 @@ class PostsRecommend(Resource):
         doc_distribution = np.array(
             [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
         )
+        vector_doc = lda_model[bow]
         # recommender posts
-        most_sim_ids = list(get_most_similar_documents(
-            doc_distribution, doc_topic_dist))[1:]
-
+        #most_sim_ids = list(get_most_similar_documents(doc_distribution, doc_topic_dist))[1:]
+        most_sim_ids = list(get_posts_similarity(vector_doc))
+        if main_post['idrs'] in most_sim_ids:
+            most_sim_ids.remove(main_post['idrs'])
         most_sim_ids = [int(id_) for id_ in most_sim_ids]
         posts = mongo_col.aggregate([
             {"$lookup": {
