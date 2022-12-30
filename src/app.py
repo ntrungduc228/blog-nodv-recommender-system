@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 import json
 
 import settings
-from src.distances import get_most_similar_documents, get_posts_similarity
+from src.distances import get_posts_similarity
 from src.models import make_texts_corpus
 from utils import editorJs_data_to_text
 
@@ -50,7 +50,6 @@ lda_model, corpus, id2word, doc_topic_dist = load_model()
 class Post(Resource):
     def get(self, post_id):
         main_post = mongo_col.find_one({"_id": ObjectId(post_id)})
-        idrs = main_post['idrs'] if main_post['idrs'] >=0 else -1
         main_post = {
             "_id": str(main_post["_id"]),
             "text": editorJs_data_to_text(json.loads(main_post["content"])),
@@ -98,7 +97,15 @@ class Post(Resource):
 
 class PostsRecommend(Resource):
     def get(self, post_id):
-        main_post = mongo_col.find_one({"_id": ObjectId(post_id)}, {"content": 1, "idrs": 1})
+        main_post = mongo_col.find_one({"_id": ObjectId(post_id)})
+        main_post = {
+            "_id": str(main_post["_id"]),
+            "text": editorJs_data_to_text(json.loads(main_post["content"])),
+            "title": main_post["title"],
+            "subtitle": main_post["subtitle"],
+            "content": main_post["content"],
+            "idrs": main_post["idrs"] if 'idrs' in main_post else -1
+        }
         # preprocessing
         content = editorJs_data_to_text(json.loads(main_post["content"]))
         text_corpus = make_texts_corpus([content])
