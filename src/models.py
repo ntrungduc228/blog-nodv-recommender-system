@@ -7,7 +7,7 @@ import gensim
 from gensim.utils import simple_preprocess
 import joblib
 
-from src.distances import get_most_similar_documents
+# from src.distances import get_most_similar_documents
 
 logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.INFO)
 logging.root.level = logging.INFO
@@ -132,9 +132,9 @@ class LDAModel:
         )
         return corpus, document_dist
 
-    def predict(self, document_dist):
-        doc_topic_dist = self.documents_topic_distribution()
-        return get_most_similar_documents(document_dist, doc_topic_dist)
+    # def predict(self, document_dist):
+    #     doc_topic_dist = self.documents_topic_distribution()
+    #     return get_most_similar_documents(document_dist, doc_topic_dist)
 
     def update(self, new_corpus):  # TODO
         """
