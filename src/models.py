@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import gensim
 from gensim.utils import simple_preprocess
 import joblib
-
-
 logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.INFO)
 logging.root.level = logging.INFO
 
@@ -130,8 +128,6 @@ class LDAModel:
             [tup[1] for tup in self.lda_model.get_document_topics(bow=corpus)]
         )
         return corpus, document_dist
-
-
 
     def update(self, new_corpus):  # TODO
         """

@@ -50,7 +50,6 @@ lda_model, corpus, id2word, doc_topic_dist = load_model()
 class Post(Resource):
     def get(self, post_id):
         main_post = mongo_col.find_one({"_id": ObjectId(post_id)})
-        idrs = main_post['idrs'] if main_post['idrs'] >=0 else -1
         main_post = {
             "_id": str(main_post["_id"]),
             "text": editorJs_data_to_text(json.loads(main_post["content"])),
