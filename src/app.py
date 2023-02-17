@@ -114,8 +114,6 @@ class PostsRecommend(Resource):
             [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
         )
         vector_doc = lda_model[bow]
-        # recommender posts
-        #most_sim_ids = list(get_most_similar_documents(doc_distribution, doc_topic_dist))[1:]
         most_sim_ids = list(get_posts_similarity(vector_doc))
         if main_post['idrs'] in most_sim_ids:
             most_sim_ids.remove(main_post['idrs'])
@@ -159,11 +157,6 @@ class PostsRecommend(Resource):
 
 api.add_resource(PostsRecommend, '/api/posts/<post_id>/recommend')
 api.add_resource(Post, '/posts/<post_id>')
-
-# @app.route("/")
-# def hello_world():
-#     return "<p>Hello, World!</p>"
-
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8082, debug=True)
