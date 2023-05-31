@@ -1,10 +1,9 @@
+from pyvi import ViTokenizer
+from bs4 import BeautifulSoup
 import logging
 import re
 import os
 current_directory = os.getcwd()
-from bs4 import BeautifulSoup
-from pyvi import ViTokenizer
-from pyeditorjs import EditorJsParser
 
 logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.INFO)
 logging.root.level = logging.INFO
@@ -26,8 +25,7 @@ def preprocessing_tags(soup, tags=None):
     return soup.get_text()
 
 
-
-def editorJs_data_to_text(html, tags=['pre', 'code', 'a', 'img', 'i']):
+def editorJs_data_to_text(html, tags=['pre', 'code', 'a', 'img', 'i', "raw"]):
     """ Converts a editorjs data to plaintext
     """
     soup = BeautifulSoup(html, 'html.parser')

@@ -30,6 +30,7 @@ def tokenize(text, STOPWORDS):
 
 
 def make_texts_corpus(sentences):
+    print(sentences)
     for sentence in sentences:
         yield simple_preprocess(sentence, deacc=True)
 

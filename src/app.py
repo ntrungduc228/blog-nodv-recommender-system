@@ -47,68 +47,20 @@ def load_model():
 lda_model, corpus, id2word, doc_topic_dist = load_model()
 
 
-class Post(Resource):
-    def get(self, post_id):
-        main_post = mongo_col.find_one({"_id": ObjectId(post_id)})
-        main_post = {
-            "_id": str(main_post["_id"]),
-            "text": editorJs_data_to_text(json.loads(main_post["content"])),
-            "title": main_post["title"],
-            "subtitle": main_post["subtitle"],
-            "content": main_post["content"],
-            "idrs": main_post["idrs"] if 'idrs' in main_post else -1
-        }
-
-        # preprocessing
-        content = editorJs_data_to_text(json.loads(main_post["content"]))
-        text_corpus = make_texts_corpus([content])
-        bow = id2word.doc2bow(next(text_corpus))
-        doc_distribution = np.array(
-            [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
-        )
-        vector_doc = lda_model[bow]
-        # print('doc ', doc_distribution)
-
-        # recommender posts
-        # most_sim_ids = list(get_most_similar_documents(doc_distribution, doc_topic_dist))[1:]
-        most_sim_ids = list(get_posts_similarity(vector_doc))
-        if main_post['idrs'] in most_sim_ids:
-            most_sim_ids.remove(main_post['idrs'])
-        most_sim_ids = [int(id_) for id_ in most_sim_ids]
-        print('most ', most_sim_ids)
-        posts = mongo_col.find({"idrs": {"$in": most_sim_ids}})
-        related_posts = [
-                            {
-                                "_id": str(post["_id"]),
-                                "title": post["title"],
-                            }
-                            for post in posts
-                        ][1:]
-
-        return jsonify({"post": {
-            "_id": str(main_post["_id"]),
-            "text": editorJs_data_to_text(json.loads(main_post["content"])),
-            "title": main_post["title"],
-            "subtitle": main_post["subtitle"]
-        },
-            "related_posts": related_posts,
-        })
-
-
 class PostsRecommend(Resource):
     def get(self, post_id):
         main_post = mongo_col.find_one({"_id": ObjectId(post_id)})
         main_post = {
             "_id": str(main_post["_id"]),
-            "text": editorJs_data_to_text(json.loads(main_post["content"])),
+            "text": editorJs_data_to_text(main_post["content"]),
             "title": main_post["title"],
             "subtitle": main_post["subtitle"],
             "content": main_post["content"],
             "idrs": main_post["idrs"] if 'idrs' in main_post else -1
         }
+
         # preprocessing
-        content = editorJs_data_to_text(json.loads(main_post["content"]))
-        print('content ', content)
+        content = main_post["text"]
         text_corpus = make_texts_corpus([content])
         bow = id2word.doc2bow(next(text_corpus))
         doc_distribution = np.array(
@@ -142,22 +94,21 @@ class PostsRecommend(Resource):
             {"$sort": {"createdDate": -1}},
         ])
         related_posts = [
-                            {
-                                "id": post["id"],
-                                "title": post["title"],
-                                "user": post["user"],
-                                "thumbnail": post["thumbnail"] if "thumbnail" in post else None,
-                                "createdDate": post["createdDate"],
-                                "idrs": post["idrs"]
-                            }
-                            for post in posts
-                        ]
+            {
+                "id": post["id"],
+                "title": post["title"],
+                "user": post["user"],
+                "thumbnail": post["thumbnail"] if "thumbnail" in post else None,
+                "createdDate": post["createdDate"],
+                "idrs": post["idrs"]
+            }
+            for post in posts
+        ]
         related_posts.sort(key=lambda x: most_sim_ids.index(x["idrs"]))
         return jsonify(related_posts)
 
 
 api.add_resource(PostsRecommend, '/api/posts/<post_id>/recommend')
-api.add_resource(Post, '/posts/<post_id>')
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8082, debug=True)
+    app.run(host="localhost", port=8080, debug=True)
