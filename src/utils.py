@@ -9,7 +9,7 @@ from pyeditorjs import EditorJsParser
 logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.INFO)
 logging.root.level = logging.INFO
 
-with open('../data/vni_stopwords.txt', encoding="utf8") as f:
+with open('./data/vni_stopwords.txt', encoding="utf8") as f:
     stopwords = []
     for line in f:
         stopwords.append("_".join(line.strip().split()))
@@ -27,11 +27,9 @@ def preprocessing_tags(soup, tags=None):
 
 
 
-def editorJs_data_to_text(data, tags=['pre', 'code', 'a', 'img', 'i']):
+def editorJs_data_to_text(html, tags=['pre', 'code', 'a', 'img', 'i']):
     """ Converts a editorjs data to plaintext
     """
-    parser = EditorJsParser(data)
-    html = parser.html(sanitize=True)
     soup = BeautifulSoup(html, 'html.parser')
     # remove code snippets
     text = preprocessing_tags(soup, tags)

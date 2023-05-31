@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import entropy
 from gensim import similarities
-from src import settings
+import settings
 
 
 index = similarities.MatrixSimilarity.load(settings.PATH_MATRIX_SIMILARITY)
