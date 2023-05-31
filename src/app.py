@@ -68,7 +68,6 @@ class PostsRecommend(Resource):
         )
         vector_doc = lda_model[bow]
         most_sim_ids = list(get_posts_similarity(vector_doc))
-        print("🚀 ~ file: app.py:64 ~ content:", most_sim_ids)
         if main_post['idrs'] in most_sim_ids:
             most_sim_ids.remove(main_post['idrs'])
         most_sim_ids = [int(id_) for id_ in most_sim_ids]
