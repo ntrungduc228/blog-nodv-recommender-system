@@ -93,6 +93,7 @@ class PostsRecommend(Resource):
             }}},
             {"$sort": {"createdDate": -1}},
         ])
+
         related_posts = [
             {
                 "id": post["id"],
