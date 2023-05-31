@@ -7,8 +7,8 @@ from bson.objectid import ObjectId
 import json
 
 import settings
-from src.distances import get_posts_similarity
-from src.models import make_texts_corpus
+from distances import get_posts_similarity
+from models import make_texts_corpus
 from utils import editorJs_data_to_text
 
 client = pymongo.MongoClient(settings.MONGODB_SETTINGS["host"])
@@ -108,6 +108,7 @@ class PostsRecommend(Resource):
         }
         # preprocessing
         content = editorJs_data_to_text(json.loads(main_post["content"]))
+        print('content ', content)
         text_corpus = make_texts_corpus([content])
         bow = id2word.doc2bow(next(text_corpus))
         doc_distribution = np.array(
